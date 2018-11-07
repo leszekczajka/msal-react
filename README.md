@@ -1,28 +1,27 @@
 # README
 
-Azure AD B2C is a cost effective identity provider covering social and enterprise logins but it can be awekward to integrate with - its documentation is currently not great and using it involves rooting around across multiple samples, the ADAL library, and the MSAL library.
+Azure AD B2C is a identity provider covering social and enterprise logins.
 
-That being the case I've focused this package on B2C although with minor changes it could be used more broadly. MSAL itself, which this library wraps, is rather generic but B2C has some specific requirements and I think half of the problem with the documentation is that you end up drifting across B2C and straight AD. I wanted to make things simpler for B2C.
+The Microsoft Authentication library (MSAL) is JavaScript library to authenticate enterprise users using Microsoft Azure Active Directory (AAD), Microsoft account users (MSA), users using social identity providers like Facebook, Google, LinkedIn etc. and get access to Microsoft Cloud or Microsoft Graph.
 
-Hopefully this will help people writing React apps. It makes use of MSAL underneath and the core of it (other than protecting routes) will probably work with other frameworks too but I use React at the moment. As it's an SPA my assumption in the library and documentation below is that you ultimately want to get an access token that you can use to call remote APIs. See this [Azure AD B2C post here](https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-access-tokens) for details on how to set this up on the B2C side.
-
-PRs welcome!
+This module is React wrapper over MSAL for Azure AD B2C.
 
 ## Installation
 
 If you are using npm:
 
-    npm install react-azure-adb2c --save
+    npm install @kdpw/msal-b2c-react --save
 
 Or if you are using yarn:
 
-    yarn add react-azure-adb2c
+    yarn add @kdpw/msal-b2c-react
 
 ## Initializing the Library
 
 You'll first need to load the module and pass some configuration to the library. Normally this would go in your index.js file:
 
-    import authentication from 'react-azure-adb2c';
+    import authentication from '@kdpw/msal-b2c-react';
+
     authentication.initialize({
         // optional, will default to this
         instance: 'https://login.microsoftonline.com/tfp/', 
@@ -41,7 +40,9 @@ You'll first need to load the module and pass some configuration to the library.
         // optional, the redirect URI - if not specified MSAL will pick up the location from window.href
         redirectUri: 'http://localhost:3000',
         // optional, the URI to redirect to after logout
-        postLogoutRedirectUri: 'http://myapp.com'
+        postLogoutRedirectUri: 'http://myapp.com',
+        // optional, default to true, set to false if you change instance
+        validateAuthority: false
     });
     
 ## Authenticating When The App Starts
@@ -58,7 +59,7 @@ If you want to set things up so that a user is authenticated as soon as they hit
 If you want to set things up so that a user is authenticated as they visit a part of the application that requires authentication then the appropriate components can be wrapped inside higher order components that will handle the authentication process. This is done using the _authentication.required_ function, normally in conjunction with a router. The example below shows this using the popular react-router:
 
     import React, { Component } from 'react';
-    import authentication from 'react-azure-adb2c'
+    import authentication from '@kdpw/msal-b2c-react'
     import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
     import HomePage from './Homepage'
     import MembersArea from './MembersArea'
@@ -76,21 +77,41 @@ If you want to set things up so that a user is authenticated as they visit a par
       }
     }
 
+## Getting the Id Token
+
+Simply call the method _getIdToken_:
+
+    import authentication from '@kdpw/msal-b2c-react'
+
+    // ...
+
+    const id_token = authentication.getIdToken();
+
 ## Getting the Access Token
 
 Simply call the method _getAccessToken_:
 
-    import authentication from 'react-azure-adb2c'
+    import authentication from '@kdpw/msal-b2c-react'
 
     // ...
 
-    const token = authentication.getAccessToken();
+    const access_token = authentication.getAccessToken();
+
+## Getting the User Name
+
+Simply call the method _getUserName_:
+
+    import authentication from '@kdpw/msal-b2c-react'
+
+    // ...
+
+    const userName = authentication.getUserName();
 
 ## Signing Out
 
 To sign out:
 
-    import authentication from 'react-azure-adb2c'
+    import authentication from '@kdpw/msal-b2c-react'
 
     // ...
 
@@ -98,4 +119,4 @@ To sign out:
 
 ## Thanks
 
-To build this I made use of the B2C site, the [MSAL library docs](https://github.com/AzureAD/microsoft-authentication-library-for-js), the [react-adal source](https://github.com/salvoravida/react-adal) and this [React MSAL sample](https://github.com/sunilbandla/react-msal-sample). Thanks!
+To build this I made fork of [react-azure-adb2c](https://github.com/JamesRandall/react-azure-adb2c) module. Thanks!

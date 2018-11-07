@@ -1,15 +1,15 @@
 {
-  "name": "@kdpw/msal-react",
-  "version": "0.2.2",
+  "name": "@kdpw/msal-b2c-react",
+  "version": "0.0.1",
   "description": "React wrapper over MS Authentication library for Azure AD B2C",
-  "main": "lib/msal-react.js",
+  "main": "lib/msal-b2c-react.js",
   "scripts": {
     "compile": "cross-env NODE_ENV=production babel src --out-dir lib",
     "prepublish": "npm run compile"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/leszekczajka/msal-react.git"
+    "url": "git+https://github.com/leszekczajka/msal-b2c-react.git"
   },
   "keywords": [
     "react",
@@ -26,11 +26,11 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/leszekczajka/msal-react/issues"
+    "url": "https://github.com/leszekczajka/msal-b2c-react/issues"
   },
-  "homepage": "https://github.com/leszekczajka/msal-react#readme",
+  "homepage": "https://github.com/leszekczajka/msal-b2c-react#readme",
   "dependencies": {
-    "msal": "^0.1.5"
+    "msal": "^0.2.3"
   },
   "peerDependencies": {
     "react": "^15.0.0 || ^16.0.0"
