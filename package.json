@@ -1,6 +1,6 @@
 {
   "name": "@kdpw/msal-b2c-react",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "React wrapper over MS Authentication library for Azure AD B2C",
   "main": "lib/msal-b2c-react.js",
   "scripts": {

@@ -4,7 +4,7 @@ Azure AD B2C is a identity provider covering social and enterprise logins.
 
 The Microsoft Authentication library (MSAL) is JavaScript library to authenticate enterprise users using Microsoft Azure Active Directory (AAD), Microsoft account users (MSA), users using social identity providers like Facebook, Google, LinkedIn etc. and get access to Microsoft Cloud or Microsoft Graph.
 
-This module is React wrapper over MSAL for Azure AD B2C.
+This module is React wrapper over MSAL for Azure AD B2C. It fully supports active SSO sessions.
 
 ## Installation
 

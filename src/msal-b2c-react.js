@@ -52,7 +52,7 @@ function authCallback(errorDesc, token, error, tokenType) {
 
 function redirect() {
   const localMsalApp = window.msal;
-  const instance = config.instance ? config.instance : 'https://login.microsoftonline.com/tfp/';
+  const instance = appConfig.instance ? appConfig.instance : 'https://login.microsoftonline.com/tfp/';
   const authority = `${instance}${appConfig.tenant}/${appConfig.resetPolicy}`;
   localMsalApp.authority = authority;
   loginAndAcquireToken();
@@ -127,6 +127,7 @@ const authentication = {
     appConfig = config;
     const instance = config.instance ? config.instance : 'https://login.microsoftonline.com/tfp/';
     const authority = `${instance}${config.tenant}/${config.signInPolicy}`;
+    const validateAuthority = (config.validateAuthority != null) ? config.validateAuthority : true;
     let scopes = config.scopes;
     if (!scopes || scopes.length === 0) {
       console.log('To obtain access tokens you must specify one or more scopes. See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-access-tokens');
@@ -143,7 +144,7 @@ const authentication = {
         cacheLocation: config.cacheLocation,
         postLogoutRedirectUri: config.postLogoutRedirectUri,
         redirectUri: config.redirectUri,
-        validateAuthority: config.validateAuthority ? config.validateAuthority : true
+        validateAuthority: validateAuthority
       }
     );
   },
@@ -164,7 +165,7 @@ const authentication = {
       }
 
       componentWillMount() {
-        acquireToken(() => {
+        loginAndAcquireToken(() => {
           this.setState({
             ...this.state,
             signedIn: true
@@ -175,9 +176,8 @@ const authentication = {
       render() {
         if (this.state.signedIn) {
           return (<WrappedComponent {...this.props} />);
-        } else {
-          return typeof renderLoading === 'function' ? renderLoading() : null;
         };
+        return typeof renderLoading === 'function' ? renderLoading() : null;
       };
     };
   },
