@@ -34,7 +34,9 @@ var appConfig = {
   // optional, the URI to redirect to after logout
   postLogoutRedirectUri: null,
   // optional, default to true, set to false if you change instance
-  validateAuthority: null
+  validateAuthority: null,
+  // optional, default to false, set to true if you want to acquire token silently and avoid redirections to login page
+  silentLoginOnly: false
 };
 
 function loggerCallback(logLevel, message, piiLoggingEnabled) {
@@ -46,8 +48,7 @@ function authCallback(errorDesc, token, error, tokenType) {
     redirect();
   } else if (errorDesc) {
     console.log(error + ':' + errorDesc);
-  } else {
-  }
+  } else {}
 }
 
 function redirect() {
@@ -66,8 +67,14 @@ function loginAndAcquireToken(successCallback) {
 
     // user is not logged in
     if (state.noScopes) {
-      // no need of access token, just redirect to login page
-      localMsalApp.loginRedirect(appConfig.scopes);
+      // no need of access token
+      if (appConfig.silentLoginOnly) {
+        // on silent mode we call error app
+        if (state.errorApp)
+          state.errorApp();
+      } else
+        // just redirect to login page
+        localMsalApp.loginRedirect(appConfig.scopes);
     } else {
       // try to get token from SSO session
       localMsalApp.acquireTokenSilent(appConfig.scopes, null, null, "&login_hint&domain_hint=organizations").then(accessToken => {
@@ -83,7 +90,10 @@ function loginAndAcquireToken(successCallback) {
         }
       }, error => {
         if (error) {
-          localMsalApp.loginRedirect(appConfig.scopes);
+          if (appConfig.silentLoginOnly)
+            state.errorApp();
+          else
+            localMsalApp.loginRedirect(appConfig.scopes);
         }
       });
     }
@@ -123,76 +133,80 @@ function loginAndAcquireToken(successCallback) {
 }
 
 const authentication = {
-  initialize: (config) => {
-    appConfig = config;
-    const instance = config.instance ? config.instance : 'https://login.microsoftonline.com/tfp/';
-    const authority = `${instance}${config.tenant}/${config.signInPolicy}`;
-    const validateAuthority = (config.validateAuthority != null) ? config.validateAuthority : true;
-    let scopes = config.scopes;
-    if (!scopes || scopes.length === 0) {
-      console.log('To obtain access tokens you must specify one or more scopes. See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-access-tokens');
-      state.noScopes = true;
-    }
-    state.scopes = scopes;
-
-    new Msal.UserAgentApplication(
-      config.applicationId,
-      authority,
-      authCallback,
-      {
-        logger: logger,
-        cacheLocation: config.cacheLocation,
-        postLogoutRedirectUri: config.postLogoutRedirectUri,
-        redirectUri: config.redirectUri,
-        validateAuthority: validateAuthority
+    initialize: (config) => {
+      appConfig = config;
+      const instance = config.instance ? config.instance : 'https://login.microsoftonline.com/tfp/';
+      const authority = `${instance}${config.tenant}/${config.signInPolicy}`;
+      const validateAuthority = (config.validateAuthority != null) ? config.validateAuthority : true;
+      let scopes = config.scopes;
+      if (!scopes || scopes.length === 0) {
+        console.log('To obtain access tokens you must specify one or more scopes. See https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-access-tokens');
+        state.noScopes = true;
       }
-    );
-  },
-  run: (launchApp) => {
-    state.launchApp = launchApp;
-    if (!window.msal.isCallback(window.location.hash) && window.parent === window && !window.opener) {
-      loginAndAcquireToken();
-    }
-  },
-  required: (WrappedComponent, renderLoading) => {
-    return class extends React.Component {
-      constructor(props) {
-        super(props);
-        this.state = {
-          signedIn: false,
-          error: null,
-        };
+      state.scopes = scopes;
+
+      new Msal.UserAgentApplication(
+        config.applicationId,
+        authority,
+        authCallback, {
+          logger: logger,
+          cacheLocation: config.cacheLocation,
+          postLogoutRedirectUri: config.postLogoutRedirectUri,
+          redirectUri: config.redirectUri,
+          validateAuthority: validateAuthority
+        }
+      );
+    },
+    run: (launchApp, errorApp) => {
+      state.launchApp = launchApp
+      if (errorApp)
+        state.errorApp = errorApp;
+      if (!window.msal.isCallback(window.location.hash) && window.parent === window && !window.opener) {
+        loginAndAcquireToken();
       }
+    },
+    required: (WrappedComponent, renderLoading) => {
+      return class extends React.Component {
+          constructor(props) {
+            super(props);
+            this.state = {
+              signedIn: false,
+              error: null,
+            };
+          }
 
-      componentWillMount() {
-        loginAndAcquireToken(() => {
-          this.setState({
-            ...this.state,
-            signedIn: true
-          });
-        });
-      };
+          componentWillMount() {
+            loginAndAcquireToken(() => {
+              this.setState({
+                ...this.state,
+                signedIn: true
+              });
+            });
+          };
 
-      render() {
-        if (this.state.signedIn) {
-          return (<WrappedComponent {...this.props} />);
-        };
-        return typeof renderLoading === 'function' ? renderLoading() : null;
-      };
-    };
-  },
-  signOut: () => {
-    window.msal.logout()
-  },
-  getIdToken: () => {
-    return state.idToken;
-  },
-  getAccessToken: () => {
-    return state.accessToken;
-  },
-  getUserName: () => {
-    return state.userName;
-  }
-}
+          render() {
+            if (this.state.signedIn) {
+              return ( < WrappedComponent {
+                  ...this.props
+                }
+                />);
+              };
+              return typeof renderLoading === 'function' ? renderLoading() : null;
+            };
+          };
+        },
+        signOut: () => {
+          window.msal.logout()
+        },
+        getIdToken: () => {
+          return state.idToken;
+        },
+        getAccessToken: () => {
+          return state.accessToken;
+        },
+        getUserName: () => {
+          return state.userName;
+        }
+    }
 
-export default authentication;
+    export default authentication;

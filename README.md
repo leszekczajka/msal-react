@@ -23,9 +23,9 @@ You'll first need to load the module and pass some configuration to the library.
     import authentication from '@kdpw/msal-b2c-react';
 
     authentication.initialize({
-        // optional, will default to this
+        // you can user your b2clogin.com domain here, setting is optional, will default to this
         instance: 'https://login.microsoftonline.com/tfp/', 
-        // your B2C tenant
+        // your B2C tenant, you can also user tenants GUID here
         tenant: 'myb2ctenant.onmicrosoft.com',
         // the policy to use to sign in, can also be a sign up or sign in policy
         signInPolicy: 'mysigninpolicy',
@@ -42,7 +42,9 @@ You'll first need to load the module and pass some configuration to the library.
         // optional, the URI to redirect to after logout
         postLogoutRedirectUri: 'http://myapp.com',
         // optional, default to true, set to false if you change instance
-        validateAuthority: false
+        validateAuthority: false,
+        // optional, default to false, set to true if you only want to acquire token silently and avoid redirections to login page
+        silentLoginOnly: false
     });
     
 ## Authenticating When The App Starts
