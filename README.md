@@ -44,7 +44,9 @@ You'll first need to load the module and pass some configuration to the library.
         // optional, default to true, set to false if you change instance
         validateAuthority: false,
         // optional, default to false, set to true if you only want to acquire token silently and avoid redirections to login page
-        silentLoginOnly: false
+        silentLoginOnly: false,
+        // optional, extra query parameters passed to the URI
+        extraQueryParameters: "&login_hint&domain_hint=organizations"
     });
     
 ## Authenticating When The App Starts
