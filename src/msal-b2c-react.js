@@ -74,10 +74,10 @@ function loginAndAcquireToken(successCallback) {
           state.errorApp();
       } else
         // just redirect to login page
-        localMsalApp.loginRedirect(appConfig.scopes);
+        localMsalApp.loginRedirect(appConfig.scopes, appConfig.extraQueryParameters);
     } else {
       // try to get token from SSO session
-      localMsalApp.acquireTokenSilent(appConfig.scopes, null, null, "&login_hint&domain_hint=organizations").then(accessToken => {
+      localMsalApp.acquireTokenSilent(appConfig.scopes, null, null, "&login_hint&domain_hint=organizations" + appConfig.extraQueryParameters).then(accessToken => {
         state.accessToken = accessToken;
         user = localMsalApp.getUser(appConfig.scopes);
         state.idToken = user.idToken;
@@ -93,7 +93,7 @@ function loginAndAcquireToken(successCallback) {
           if (appConfig.silentLoginOnly)
             state.errorApp();
           else
-            localMsalApp.loginRedirect(appConfig.scopes);
+            localMsalApp.loginRedirect(appConfig.scopes, appConfig.extraQueryParameters);
         }
       });
     }
@@ -113,7 +113,7 @@ function loginAndAcquireToken(successCallback) {
       }
     } else {
       // get access token
-      localMsalApp.acquireTokenSilent(appConfig.scopes).then(accessToken => {
+      localMsalApp.acquireTokenSilent(appConfig.scopes, null, null, appConfig.extraQueryParameters).then(accessToken => {
         state.accessToken = accessToken;
         if (state.launchApp) {
           state.launchApp();
